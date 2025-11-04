@@ -1,0 +1,5 @@
+.obj
+.deps
+*.o
+*.obj
+ft_malcolm
