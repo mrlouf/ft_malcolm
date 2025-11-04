@@ -8,7 +8,10 @@ SRC			= 	.
 
 # -=-=-=-=-    FILES -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
-SRC			=	main.c
+SRC			=	main.c		\
+				init.c		\
+				parse.c		\
+				malcolm.c
 
 SRCDIR		= srcs
 SRCS		= $(addprefix $(SRCDIR)/, $(SRC))
@@ -50,7 +53,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c $(LIBFT) Makefile
 	@mv $(patsubst %.o,%.d,$@) $(subst $(OBJDIR),$(DEPDIR),$(@D))/
 	
 clean:
-	@/bin/rm -f $(OBJS)
+	@/bin/rm -rf $(OBJDIR) $(DEPDIR)
 	@make -C ./libft clean
 
 fclean: clean

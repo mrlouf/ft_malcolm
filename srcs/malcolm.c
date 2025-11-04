@@ -1,33 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   malcolm.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/04 18:13:50 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/04 18:37:10 by nponchon         ###   ########.fr       */
+/*   Created: 2025/11/04 18:38:53 by nponchon          #+#    #+#             */
+/*   Updated: 2025/11/04 18:40:45 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../incs/ft_malcolm.h"
 
-void	print_usage(char *prog_name)
+void	start_malcolm()
 {
-	printf("Usage: %s <IPv4> <MAC> <IPv4> <MAC>\n", prog_name);
-}
-
-int	main(int ac, char **av)
-{
-    if (ac != 5)
-    {
-        print_usage(av[0]);
-        return (1);
-    }
-
-    parse_malcolm(ac, av);
-    init_malcolm(av);
-    start_malcolm();
-
-    return (0);
+    // Execution code goes here
 }
