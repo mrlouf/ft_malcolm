@@ -6,20 +6,50 @@
 /*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:11:35 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/04 18:40:37 by nponchon         ###   ########.fr       */
+/*   Updated: 2025/11/05 08:04:14 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FT_MALCOLM_H
 # define FT_MALCOLM_H
 
-# include <stdio.h>
-# include <stdlib.h>
+/* ************************************************************************** */
+/*                              Libraries                                     */
+/* ************************************************************************** */
 
-void	print_usage(char *prog_name);
-void	parse_malcolm(int ac, char **av);
-void	init_malcolm(char **av);
-void	start_malcolm();
+# include <stdio.h>     // fprintf and family
+# include <unistd.h>    // getuid
+# include <stdlib.h>    // malloc, free
+
+# include "../libft/libft.h"
+
+/* ************************************************************************** */
+/*                              Structs                                       */
+/* ************************************************************************** */
+
+typedef struct s_malcolm
+{
+    char    *source_ip;
+    char    *source_mac;
+    char    *target_ip;
+    char    *target_mac;
+}   t_malcolm;
+
+/* ************************************************************************** */
+/*                              Globals                                       */
+/* ************************************************************************** */
+
+extern int g_sigint;
+
+/* ************************************************************************** */
+/*                              Functions                                     */
+/* ************************************************************************** */
+
+void	init_malcolm(char **av, t_malcolm *m);
+int		parse_malcolm(t_malcolm *m);
+int     parse_ip(char *ip);
+int     parse_mac(char *mac);
+void	start_malcolm(t_malcolm *m);
 
 
 #endif

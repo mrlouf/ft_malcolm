@@ -6,7 +6,7 @@
 /*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 12:20:08 by nponchon          #+#    #+#             */
-/*   Updated: 2025/09/30 18:17:58 by nponchon         ###   ########.fr       */
+/*   Updated: 2025/11/05 08:22:01 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ typedef struct s_list
 
 int			ft_isalpha(int c);
 int			ft_isdigit(int c);
+int			ft_isxdigit(int c);
 int			ft_isalnum(int c);
 int			ft_isascii(int c);
 int			ft_isprint(int c);

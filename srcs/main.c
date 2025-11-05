@@ -6,28 +6,40 @@
 /*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:13:50 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/04 18:37:10 by nponchon         ###   ########.fr       */
+/*   Updated: 2025/11/05 08:03:01 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../incs/ft_malcolm.h"
 
-void	print_usage(char *prog_name)
-{
-	printf("Usage: %s <IPv4> <MAC> <IPv4> <MAC>\n", prog_name);
-}
-
 int	main(int ac, char **av)
 {
+    if (getuid() != 0)
+    {
+        fprintf(stderr, "Error: This program must be run as root.\n");
+        return (1);
+    }
     if (ac != 5)
     {
-        print_usage(av[0]);
+        fprintf(stderr, "Usage: %s <source_ip> <source_mac> <target_ip> <target_mac>\n", av[0]);
         return (1);
     }
 
-    parse_malcolm(ac, av);
-    init_malcolm(av);
-    start_malcolm();
+    t_malcolm *m = malloc(sizeof(t_malcolm));
+    if (!m)
+    {
+        fprintf(stderr, "Error: Memory allocation failed.\n");
+        return (1);
+    }
 
+    init_malcolm(av, m);
+    if (parse_malcolm(m))
+    {
+        free(m);
+        return (1);
+    }
+    start_malcolm(m);
+
+    free(m);
     return (0);
 }

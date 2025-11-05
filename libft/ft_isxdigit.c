@@ -1,21 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   init.c                                             :+:      :+:    :+:   */
+/*   ft_isxdigit.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/04 18:38:31 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/05 07:52:08 by nponchon         ###   ########.fr       */
+/*   Created: 2025/11/05 08:21:29 by nponchon          #+#    #+#             */
+/*   Updated: 2025/11/05 08:21:43 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../incs/ft_malcolm.h"
+#include "libft.h"
 
-void	init_malcolm(char **av, t_malcolm *m)
+int	ft_isxdigit(int c)
 {
-    m->source_ip = av[1];
-    m->source_mac = av[2];
-    m->target_ip = av[3];
-    m->target_mac = av[4];
+    if ((c >= '0' && c <= '9') ||
+        (c >= 'a' && c <= 'f') ||
+        (c >= 'A' && c <= 'F'))
+        return (1);
+    return (0);
 }
