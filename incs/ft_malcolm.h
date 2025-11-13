@@ -6,7 +6,7 @@
 /*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:11:35 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/05 08:04:14 by nponchon         ###   ########.fr       */
+/*   Updated: 2025/11/13 21:21:43 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@
 # include <arpa/inet.h>		// htons and family
 # include <linux/if_packet.h>	// packet memberships
 # include <net/ethernet.h>
+# include <netinet/in.h>    // compatibility
+# include <netinet/ip.h>    // compatibility
 
 # include "../libft/libft.h"
 
