@@ -56,7 +56,10 @@ docker_down:
 	docker stop containerA containerB
 	docker rm containerA containerB
 	docker network rm my_bridge
-	
+
+example: $(NAME)
+	sudo ./ft_malcolm 172.18.0.2 FF:FF:FF:FF:FF:FF 172.18.0.3 FF:FF:FF:FF:FF:FF	
+
 clean:
 	@/bin/rm -fr $(OBJDIR)
 	@make -C ./libft clean
@@ -67,4 +70,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY:  all clean fclean re make_libft
+.PHONY:  all clean fclean re make_libft docker_up docker_down example
