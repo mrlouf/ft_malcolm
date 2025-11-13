@@ -24,7 +24,6 @@
 # include <arpa/inet.h>		// htons and family
 # include <linux/if_packet.h>	// packet memberships
 # include <net/ethernet.h>
-# include <netinet/ip.h>
 
 # include "../libft/libft.h"
 
