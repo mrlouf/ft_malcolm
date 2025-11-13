@@ -21,7 +21,7 @@ int	main(int ac, char **av)
     }
     if (ac != 5)
     {
-        fprintf(stderr, "Usage: %s <source_ip> <source_mac> <target_ip> <target_mac>\n", av[0]);
+        fprintf(stderr, "Usage: sudo  %s <source_ip> <source_mac> <target_ip> <target_mac>\n", av[0]);
         return (1);
     }
 
@@ -38,7 +38,8 @@ int	main(int ac, char **av)
         free(m);
         return (1);
     }
-    start_malcolm(m);
+    if (listen_arp(m) == 0)
+    	send_arp(m);
 
     free(m);
     return (0);

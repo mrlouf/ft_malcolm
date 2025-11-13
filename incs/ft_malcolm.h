@@ -17,9 +17,14 @@
 /*                              Libraries                                     */
 /* ************************************************************************** */
 
-# include <stdio.h>     // fprintf and family
-# include <unistd.h>    // getuid
-# include <stdlib.h>    // malloc, free
+# include <stdio.h>		// fprintf and family
+# include <unistd.h>		// getuid
+# include <stdlib.h>    	// malloc, free
+# include <sys/socket.h>	// socket
+# include <arpa/inet.h>		// htons and family
+# include <linux/if_packet.h>	// packet memberships
+# include <net/ethernet.h>
+# include <netinet/ip.h>
 
 # include "../libft/libft.h"
 
@@ -33,6 +38,9 @@ typedef struct s_malcolm
     char    *source_mac;
     char    *target_ip;
     char    *target_mac;
+
+    int	socket;
+
 }   t_malcolm;
 
 /* ************************************************************************** */
@@ -46,10 +54,10 @@ extern int g_sigint;
 /* ************************************************************************** */
 
 void	init_malcolm(char **av, t_malcolm *m);
-int		parse_malcolm(t_malcolm *m);
+int	parse_malcolm(t_malcolm *m);
 int     parse_ip(char *ip);
 int     parse_mac(char *mac);
-void	start_malcolm(t_malcolm *m);
-
+void	send_arp(t_malcolm *m);
+int	listen_arp(t_malcolm *m);
 
 #endif

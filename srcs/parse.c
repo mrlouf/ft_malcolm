@@ -101,19 +101,19 @@ int parse_ip(char *ip)
 int parse_malcolm(t_malcolm *m)
 {
     if (parse_ip(m->source_ip)){
-        fprintf(stderr, "Error: Invalid source IP address.\n");
+        fprintf(stderr, "Error: Invalid source IP address: %s \n", m->source_ip);
         return (1);
     }
     if (parse_mac(m->source_mac)) {
-        fprintf(stderr, "Error: Invalid source MAC address.\n");
+        fprintf(stderr, "Error: Invalid source MAC address: %s \n", m->source_mac);
         return (1);
     }
     if (parse_ip(m->target_ip)){
-        fprintf(stderr, "Error: Invalid target IP address.\n");
+        fprintf(stderr, "Error: Invalid target IP address: %s \n", m->target_ip);
         return (1);
     }
     if (parse_mac(m->target_mac)){
-        fprintf(stderr, "Error: Invalid target MAC address.\n");
+        fprintf(stderr, "Error: Invalid target MAC address: %s \n", m->target_mac);
         return (1);
     }
     return (0);

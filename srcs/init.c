@@ -18,4 +18,6 @@ void	init_malcolm(char **av, t_malcolm *m)
     m->source_mac = av[2];
     m->target_ip = av[3];
     m->target_mac = av[4];
+
+    m->socket = -1;
 }

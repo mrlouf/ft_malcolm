@@ -8,19 +8,16 @@ SRC			= 	.
 
 # -=-=-=-=-    FILES -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
-SRC			=	main.c		\
-				init.c		\
-				parse.c		\
-				malcolm.c
+SRC			=	main.c			\
+				init.c			\
+				malcolm.c		\
+				parse.c
 
 SRCDIR		= srcs
 SRCS		= $(addprefix $(SRCDIR)/, $(SRC))
 
 OBJDIR		= .obj
 OBJS		= $(addprefix $(OBJDIR)/, $(SRC:.c=.o))
-
-DEPDIR		= .dep
-DEPS		= $(addprefix $(DEPDIR)/, $(SRC:.c=.d))
 
 # -=-=-=-=-    INCLUDES -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
@@ -33,27 +30,35 @@ MAKE		=	Makefile
 # -=-=-=-=-    NAME -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 
 CC			= cc
-CFLAGS		= -Wall -Wextra -Werror -pedantic -g -fsanitize=address
-INCLUDES	= -I./
+CFLAGS		= -Wall -Wextra -Werror -pedantic -g# -fsanitize=address
+INCLUDES	= -I
 
 # -=-=-=-=-    TARGETS -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
-all: $(NAME)
+all: make_libft $(NAME)
 
-$(NAME): $(LIBFT) $(OBJS) $(HEADERS) $(SRCS)
-	@$(CC) $(CFLAGS) $(INCLUDES) -o $(NAME) $(OBJS) $(LIBFT)
+$(NAME): $(OBJS) $(HEADERS) $(SRCS) $(LIBFT)
+	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(NAME)
 
-${LIBFT}:
-	@make -C ./libft
+make_libft:
+	@make -C libft
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c $(LIBFT) Makefile
-	@mkdir -p $(@D)
-	@$(CC) $(CFLAGS) $(INCLUDES) -MT $@ -MMD -MP -c $< -o $@
-	@mkdir -p $(DEPDIR)
-	@mv $(patsubst %.o,%.d,$@) $(subst $(OBJDIR),$(DEPDIR),$(@D))/
+$(OBJDIR)/%.o: $(SRCDIR)/%.c $(HEADERS) Makefile
+	mkdir -p $(@D)
+	$(CC) $(CFLAGS) $(INCLUDES)./libft/ -c $< -o $@
+
+docker_up:
+	docker network create --subnet=172.18.0.0/16 my_bridge
+	docker run -dit --name containerA --network my_bridge --ip 172.18.0.2 alpine sh
+	docker run -dit --name containerB --network my_bridge --ip 172.18.0.3 alpine sh
+
+docker_down:
+	docker stop containerA containerB
+	docker rm containerA containerB
+	docker network rm my_bridge
 	
 clean:
-	@/bin/rm -rf $(OBJDIR) $(DEPDIR)
+	@/bin/rm -fr $(OBJDIR)
 	@make -C ./libft clean
 
 fclean: clean
@@ -62,4 +67,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY:  all clean fclean re ${LIBFT}
+.PHONY:  all clean fclean re make_libft
