@@ -6,7 +6,7 @@
 /*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:38:53 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/05 08:05:43 by nponchon         ###   ########.fr       */
+/*   Updated: 2025/11/14 13:16:16 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ int	listen_arp(t_malcolm *m)
     printf("Target IP: %s\n", m->target_ip);
     printf("Target MAC: %s\n\n", m->target_mac);
 
-    m->socket = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+    m->socket = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));	// ETH_P_ARP to capture ARP packets only
     if (m->socket < 0) {
 	    fprintf(stderr, "Error: unable to create raw socket\n");
 	    return (1);
@@ -39,32 +39,40 @@ int	listen_arp(t_malcolm *m)
     setsockopt(m->socket, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mreq, sizeof(mreq));
     */
 
-unsigned char buf[65536];
-struct sockaddr_ll addr;
-socklen_t addrlen = sizeof(addr);
+    unsigned char buf[65536];
+    struct sockaddr_ll addr;
+    socklen_t addrlen = sizeof(addr);
 
-printf("Starting to listen for packets between A and B...\n");
+    printf("Starting to listen for packets between A and B...\n");
 
-while (42) {
-    ssize_t len = recvfrom(m->socket, buf, sizeof(buf), 0,
-                           (struct sockaddr*)&addr, &addrlen);
-    if (len < 0) continue;
+    while (42) {
+        ssize_t len = recvfrom(m->socket, buf, sizeof(buf), 0,
+                            (struct sockaddr*)&addr, &addrlen);
+        if (len < 0) continue;
 
-    struct ether_header *eth = (struct ether_header*)buf;
-    if (ntohs(eth->ether_type) != ETH_P_IP) continue;
+        struct ether_header *eth = (struct ether_header*)buf;
+        if (ntohs(eth->ether_type) != ETH_P_ARP) continue;
 
-    struct ip *ip_hdr = (struct ip*)(buf + sizeof(struct ether_header));
+		struct ether_arp *arp = (struct ether_arp *)(buf + sizeof(struct ether_header));
 
-    	// Match only packets between two known IPs
-	uint32_t ip1 = inet_addr(m->source_ip);
-	uint32_t ip2 = inet_addr(m->target_ip);
+        char sender_ip[INET_ADDRSTRLEN];
+        char target_ip[INET_ADDRSTRLEN];
 
-if (ip_hdr->ip_src.s_addr == ip1 && ip_hdr->ip_dst.s_addr == ip2) 
-	printf("Captured packet from A to B (%d bytes)\n", (int)len);
-else if (ip_hdr->ip_src.s_addr == ip2 && ip_hdr->ip_dst.s_addr == ip1) {
-	printf("Captured packet from B to A (%d bytes)\n", (int)len);
+        inet_ntop(AF_INET, arp->arp_spa, sender_ip, sizeof(sender_ip));
+        inet_ntop(AF_INET, arp->arp_tpa, target_ip, sizeof(target_ip));
+
+        printf("ARP packet captured:\n");
+        printf("  Sender MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+            arp->arp_sha[0], arp->arp_sha[1], arp->arp_sha[2],
+            arp->arp_sha[3], arp->arp_sha[4], arp->arp_sha[5]);
+        printf("  Sender IP: %s\n", sender_ip);
+        printf("  Target MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+            arp->arp_tha[0], arp->arp_tha[1], arp->arp_tha[2],
+            arp->arp_tha[3], arp->arp_tha[4], arp->arp_tha[5]);
+        printf("  Target IP: %s\n", target_ip);
+        printf("  Operation: %s\n",
+            ntohs(arp->ea_hdr.ar_op) == ARPOP_REQUEST ? "ARP Request" : "ARP Reply");
     }
-}
 
     return (0);
 }
