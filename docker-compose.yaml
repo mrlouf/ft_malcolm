@@ -1,5 +1,6 @@
 networks:
   malcolm_network:
+    driver: bridge
     ipam:
       config:
         - subnet: 172.18.0.0/16
@@ -22,13 +23,13 @@ services:
         ipv4_address: 172.18.0.3
     command: ["sleep", "infinity"]
 
+  # our main in the middle
   malcolm:
-    image: debian:latest
+    build: .
     container_name: malcolm
     networks:
       malcolm_network:
         ipv4_address: 172.18.0.42
-    command: ["sleep", "infinity"]
     depends_on:
       - containerA
       - containerB
