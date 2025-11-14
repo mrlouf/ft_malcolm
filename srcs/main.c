@@ -6,11 +6,13 @@
 /*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:13:50 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/05 08:03:01 by nponchon         ###   ########.fr       */
+/*   Updated: 2025/11/14 14:35:42 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../incs/ft_malcolm.h"
+
+int g_sigint = 0;
 
 int	main(int ac, char **av)
 {
@@ -34,13 +36,9 @@ int	main(int ac, char **av)
 
     init_malcolm(av, m);
     if (parse_malcolm(m))
-    {
-        free(m);
-        return (1);
-    }
-    if (listen_arp(m) == 0)
-    	send_arp(m);
+        return (free_malcolm(m), 1);
+    listen_arp(m);
+    free_malcolm(m);
 
-    free(m);
     return (0);
 }

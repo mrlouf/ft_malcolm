@@ -9,7 +9,7 @@ SRC			= 	.
 # -=-=-=-=-    FILES -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- #
 
 SRC			=	main.c			\
-				init.c			\
+				utils.c			\
 				malcolm.c		\
 				parse.c
 
@@ -47,20 +47,12 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c $(HEADERS) Makefile
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(INCLUDES)./libft/ -c $< -o $@
 
-docker_up:
-	docker network create --subnet=172.18.0.0/16 my_bridge
-	docker run -dit --name containerA --network my_bridge --ip 172.18.0.2 alpine sh
-	docker run -dit --name containerB --network my_bridge --ip 172.18.0.3 alpine sh
-	docker run -dit --name sniffer --network my_bridge --ip 172.18.0.4 --cap-add=NET_RAW --cap-add=NET_ADMIN debian sh
-	docker cp $(NAME) sniffer:/ft_malcolm
+up:
+	docker compose up -d --build
+	docker cp $(NAME) malcolm:/ft_malcolm
 
-docker_down:
-	docker stop containerA containerB sniffer
-	docker rm containerA containerB sniffer
-	docker network rm my_bridge
-
-example: $(NAME)
-	sudo ./ft_malcolm 172.18.0.2 FF:FF:FF:FF:FF:FF 172.18.0.3 FF:FF:FF:FF:FF:FF
+down:
+	docker compose down --rmi all --volumes --remove-orphans
 
 clean:
 	@/bin/rm -fr $(OBJDIR)
@@ -72,4 +64,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY:  all clean fclean re make_libft docker_up docker_down example
+.PHONY:  all clean fclean re make_libft up down

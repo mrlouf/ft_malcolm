@@ -1,0 +1,34 @@
+networks:
+  malcolm_network:
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
+          gateway: 172.18.0.1
+
+services:
+  containerA:
+    image: alpine:latest
+    container_name: containerA
+    networks:
+      malcolm_network:
+        ipv4_address: 172.18.0.2
+    command: ["sleep", "infinity"]
+
+  containerB:
+    image: alpine:latest
+    container_name: containerB
+    networks:
+      malcolm_network:
+        ipv4_address: 172.18.0.3
+    command: ["sleep", "infinity"]
+
+  malcolm:
+    image: debian:latest
+    container_name: malcolm
+    networks:
+      malcolm_network:
+        ipv4_address: 172.18.0.42
+    command: ["sleep", "infinity"]
+    depends_on:
+      - containerA
+      - containerB

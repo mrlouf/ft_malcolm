@@ -6,7 +6,7 @@
 /*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:11:35 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/14 12:51:26 by nponchon         ###   ########.fr       */
+/*   Updated: 2025/11/14 14:36:20 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,12 +62,6 @@ typedef struct s_malcolm
 }   t_malcolm;
 
 /* ************************************************************************** */
-/*                              Globals                                       */
-/* ************************************************************************** */
-
-extern int g_sigint;
-
-/* ************************************************************************** */
 /*                              Functions                                     */
 /* ************************************************************************** */
 
@@ -75,7 +69,12 @@ void	init_malcolm(char **av, t_malcolm *m);
 int     parse_malcolm(t_malcolm *m);
 int     parse_ip(char *ip);
 int     parse_mac(char *mac);
-void	send_arp(t_malcolm *m);
+
 int	    listen_arp(t_malcolm *m);
+void    print_arp(unsigned char *buf);
+
+void	send_arp(t_malcolm *m, unsigned char *buf);
+
+void    free_malcolm(t_malcolm *m);
 
 #endif
