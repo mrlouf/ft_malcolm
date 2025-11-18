@@ -27,6 +27,7 @@
 //# include <netinet/in.h>      // compatibility?
 //# include <netinet/ip.h>      // compatibility?
 # include <netinet/if_ether.h>  // ARP packet structure
+# include <net/if.h>			// if_nametoindex
 
 # include "../libft/libft.h"
 

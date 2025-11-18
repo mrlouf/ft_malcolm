@@ -55,7 +55,7 @@ void	send_arp(t_malcolm *m, unsigned char *buf)
 	dest_addr.sll_ifindex = if_nametoindex("eth0"); // Replace "eth0" with your interface name
 	printf("Interface index: %d\n", dest_addr.sll_ifindex);
 	dest_addr.sll_halen = ETH_ALEN; // Ethernet address length
-	ft_memcpy(dest_addr.sll_addr, target_mac, ETH_ALEN); // Set target MAC address
+	ft_memcpy(dest_addr.sll_addr, m->target_mac, ETH_ALEN); // Set target MAC address
 
 	struct ether_arp *arp = (struct ether_arp *)(buf + sizeof(struct ether_header));
 	char sender_ip[INET_ADDRSTRLEN];
