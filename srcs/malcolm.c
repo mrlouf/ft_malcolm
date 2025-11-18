@@ -6,7 +6,7 @@
 /*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:38:53 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/18 17:15:56 by nponchon         ###   ########.fr       */
+/*   Updated: 2025/11/18 17:24:32 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,9 +93,14 @@ int	listen_arp(t_malcolm *m)
 	    return (free_malcolm(m), 1);
     }
 
+	if (setsockopt(m->socket, SOL_SOCKET, SO_BINDTODEVICE, "eth0", strlen("eth0")) < 0) {
+        perror("setsockopt SO_BINDTODEVICE failed");
+        return (free_malcolm(m), 1);
+    }
+
 	// This might not be necessary since we need to send a reply at the first ARP request, ie. ignore container B's reply.
     struct packet_mreq mreq = {0};
-    mreq.mr_ifindex = 0;	// 0 means all interfaces
+    mreq.mr_ifindex = if_nametoindex("eth0");
     mreq.mr_type = PACKET_MR_PROMISC;	// set promiscuous mode to capture also non-broadcast packets, eg. unicast ARP replies 
     setsockopt(m->socket, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mreq, sizeof(mreq));
 
