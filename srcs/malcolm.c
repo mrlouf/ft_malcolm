@@ -6,7 +6,7 @@
 /*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:38:53 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/18 11:44:51 by nponchon         ###   ########.fr       */
+/*   Updated: 2025/11/18 12:41:02 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,8 +54,8 @@ void	send_arp(t_malcolm *m, unsigned char *buf)
 	struct sockaddr_ll dest_addr = {0};
 	dest_addr.sll_ifindex = if_nametoindex("eth0");
 	printf("Interface index: %d\n", dest_addr.sll_ifindex);
-	dest_addr.sll_halen = ETH_ALEN;
-	ft_memcpy(dest_addr.sll_addr, target_mac, ETH_ALEN);
+	dest_addr.sll_halen = ETH_ALEN; // Ethernet address length
+	ft_memcpy(dest_addr.sll_addr, m->target_mac, ETH_ALEN); // Set target MAC address
 
 	struct ether_arp *arp = (struct ether_arp *)(buf + sizeof(struct ether_header));
 	char sender_ip[INET_ADDRSTRLEN];
