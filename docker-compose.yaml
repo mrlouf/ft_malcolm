@@ -9,6 +9,8 @@ networks:
 services:
   containerA:
     image: alpine:latest
+    cap_add:
+      - NET_ADMIN
     container_name: containerA
     networks:
       malcolm_network:
