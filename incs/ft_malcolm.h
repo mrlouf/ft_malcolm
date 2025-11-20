@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_malcolm.h                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nicolas <nicolas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:11:35 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/14 14:36:20 by nponchon         ###   ########.fr       */
+/*   Updated: 2025/11/20 16:52:16 by nicolas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 //# include <netinet/ip.h>      // compatibility?
 # include <netinet/if_ether.h>  // ARP packet structure
 # include <net/if.h>			// if_nametoindex
+# include <time.h>              // sleep
 
 # include "../libft/libft.h"
 

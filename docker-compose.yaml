@@ -19,6 +19,8 @@ services:
 
   containerB:
     image: alpine:latest
+    cap_add:
+      - NET_ADMIN
     container_name: containerB
     networks:
       malcolm_network:
