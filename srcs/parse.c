@@ -116,13 +116,9 @@ int parse_malcolm(t_malcolm *m)
         fprintf(stderr, "Error: Invalid target MAC address: %s \n", m->target_mac);
         return (1);
     }
-	if (ac == 6) {
-		if (ft_strcmp(av[5], "-v") != 0) {
-			fprintf(stderr, "Error: Unknown option: %s \n", av[5]);
-			return (1);
-		} else {
-			m->verbose = 1;
-		}
+	if (m->verbose < 0) {
+		fprintf(stderr, "Error: Unknown flag\n");
+		return (1);
 	}
     return (0);
 }

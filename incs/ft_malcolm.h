@@ -58,6 +58,7 @@ typedef struct s_malcolm
     char    *source_mac;
     char    *target_ip;
     char    *target_mac;
+	char	*option;
 
     int		socket;
 

@@ -27,9 +27,12 @@ void	init_malcolm(char **av, t_malcolm *m)
     m->target_ip = av[3];
     m->target_mac = av[4];
 
-    m->socket = -1;
+	if (!av[5]) {
+		m->verbose = 0;
+		return ;
+	}
 
-	m->verbose = 0;
+	m->verbose = ft_strcmp(av[5], "-v") == 0 ? 1 : -1;
 }
 
 void    print_arp(unsigned char *buf)

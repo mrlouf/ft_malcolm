@@ -57,8 +57,8 @@ void	send_arp(t_malcolm *m, unsigned char *buf)
 	unsigned char src_mac[6];
 	sscanf(m->source_mac, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
 		&src_mac[0], &src_mac[1], &src_mac[2], &src_mac[3], &src_mac[4], &src_mac[5]);
-	for (size_t i = 0; i < ft_strlen(mac); i += 3)
-		dest[i / 3] = hex2int(&mac[i]);
+	//for (size_t i = 0; i < ft_strlen(mac); i += 3)
+	//	dest[i / 3] = hex2int(&mac[i]);
 
 	// broadcast ARP to force a cache update on the target (unicast does not work well)
 	unsigned char broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
