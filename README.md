@@ -25,27 +25,60 @@ ARP spoofing, also known as ARP poisoning, is a technique used to manipulate the
 ## Usage
 You need to have Docker and Make installed on your system to run this program.
 
-To compile the program, use the following command:
+To compile the program, use the following command:<br>
 ```bash make```
-To try out the program, set up the Docker environment by running:
+To try out the program, set up the Docker environment by running:<br>
 ```bash make up```
 This will start three Docker containers, each representing a device on a local network. The containers are named `containerA` (the target), `containerB` (the source), and `malcolm` (the Man-in-the-middle).
 
-## Example of a MITM attack:
-1. Open a terminal and access `containerA`:
->```bash docker exec -it containerA sh```
-2. Check the IP and MAC address of containerA:
->```bash ip a```
-3. Open another terminal and access `malcolm`:
->```bash docker exec -it malcolm /bin/bash```
-4. Check the IP and MAC address of malcolm:
->```bash ip a```
-5. Start the `ft_malcolm` program in `malcolm`, specifying the source and target IPs and MACs:
->```bash ./ft_malcolm 172.18.0.3 <MAC from malcolm> 172.18.0.2 <MAC from containerA>```
-The program will start listening for ARP traffic on the network.
-6. In containerA, send a ping request to containerB (172.18.0.3):
->```bash ping -c 1 172.18.0.3```
-Since A does not have B's MAC address in its ARP cache, it will send an ARP request to the network, which will trigger the spoofing by malcolm.
-7. Observe the output in the `malcolm` terminal. You should see that it has intercepted the ARP request from containerA and sent a forged ARP reply, associating containerB's IP address with malcolm's MAC address.
-8. To verify that the ARP spoofing was successful, check the ARP cache in containerA:
->```bash arp```
+## Example of a MITM Attack
+
+Follow these steps to simulate a Man-in-the-Middle (MITM) attack using the `ft_malcolm` program:
+
+1. **Access `containerA`:**
+	Open a terminal and run:
+	```bash
+	docker exec -it containerA sh
+	```
+
+2. **Check the IP and MAC address of `containerA`:**
+	Inside the terminal, execute:
+	```bash
+	ip a
+	```
+
+3. **Access `malcolm`:**
+	Open another terminal and run:
+	```bash
+	docker exec -it malcolm /bin/bash
+	```
+
+4. **Check the IP and MAC address of `malcolm`:**
+	Inside the terminal, execute:
+	```bash
+	ip a
+	```
+
+5. **Start the `ft_malcolm` program:**
+	In the `malcolm` terminal, run the program with the source and target IPs and MACs:
+	```bash
+	./ft_malcolm 172.18.0.3 <MAC from malcolm> 172.18.0.2 <MAC from containerA>
+	```
+	The program will begin listening for ARP traffic on the network.
+
+6. **Send a ping request from `containerA` to `containerB`:**
+	In the `containerA` terminal, execute:
+	```bash
+	ping -c 1 172.18.0.3
+	```
+	Since `containerA` does not have `containerB`'s MAC address in its ARP cache, it will broadcast an ARP request, triggering the spoofing by `malcolm`.
+
+7. **Observe the output in `malcolm`:**
+	Check the `malcolm` terminal to see the intercepted ARP request from `containerA` and the forged ARP reply sent by `malcolm`, associating `containerB`'s IP address with `malcolm`'s MAC address.
+
+8. **Verify the ARP spoofing in `containerA`:**
+	In the `containerA` terminal, check the ARP cache to confirm the spoofing:
+	```bash
+	arp
+	```
+	You should see that `containerB`'s IP address is now associated with `malcolm`'s MAC address.
