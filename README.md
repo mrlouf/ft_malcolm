@@ -33,19 +33,19 @@ This will start three Docker containers, each representing a device on a local n
 
 ## Example of a MITM attack:
 1. Open a terminal and access `containerA`:
-```bash docker exec -it containerA sh```
+>```bash docker exec -it containerA sh```
 2. Check the IP and MAC address of containerA:
-```bash ip a```
+>```bash ip a```
 3. Open another terminal and access `malcolm`:
-```bash docker exec -it malcolm /bin/bash```
+>```bash docker exec -it malcolm /bin/bash```
 4. Check the IP and MAC address of malcolm:
-```bash ip a```
+>```bash ip a```
 5. Start the `ft_malcolm` program in `malcolm`, specifying the source and target IPs and MACs:
-```bash ./ft_malcolm 172.18.0.3 <MAC from malcolm> 172.18.0.2 <MAC from containerA>```
+>```bash ./ft_malcolm 172.18.0.3 <MAC from malcolm> 172.18.0.2 <MAC from containerA>```
 The program will start listening for ARP traffic on the network.
 6. In containerA, send a ping request to containerB (172.18.0.3):
-```bash ping -c 1 172.18.0.3```
+>```bash ping -c 1 172.18.0.3```
 Since A does not have B's MAC address in its ARP cache, it will send an ARP request to the network, which will trigger the spoofing by malcolm.
 7. Observe the output in the `malcolm` terminal. You should see that it has intercepted the ARP request from containerA and sent a forged ARP reply, associating containerB's IP address with malcolm's MAC address.
 8. To verify that the ARP spoofing was successful, check the ARP cache in containerA:
-```bash arp```
+>```bash arp```
