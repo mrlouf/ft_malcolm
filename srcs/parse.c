@@ -6,7 +6,7 @@
 /*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:38:39 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/05 08:28:19 by nponchon         ###   ########.fr       */
+/*   Updated: 2025/11/24 11:00:24 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,5 +116,13 @@ int parse_malcolm(t_malcolm *m)
         fprintf(stderr, "Error: Invalid target MAC address: %s \n", m->target_mac);
         return (1);
     }
+	if (ac == 6) {
+		if (ft_strcmp(av[5], "-v") != 0) {
+			fprintf(stderr, "Error: Unknown option: %s \n", av[5]);
+			return (1);
+		} else {
+			m->verbose = 1;
+		}
+	}
     return (0);
 }

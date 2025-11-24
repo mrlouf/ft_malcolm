@@ -9,6 +9,7 @@ networks:
 services:
   containerA:
     image: alpine:latest
+    # needed to manipulate network interfaces, clear ARP cache etc.
     cap_add:
       - NET_ADMIN
     container_name: containerA

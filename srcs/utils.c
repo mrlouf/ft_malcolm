@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nicolas <nicolas@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:38:31 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/20 16:52:12 by nicolas          ###   ########.fr       */
+/*   Updated: 2025/11/24 10:58:24 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ void	init_malcolm(char **av, t_malcolm *m)
     m->target_mac = av[4];
 
     m->socket = -1;
+
+	m->verbose = 0;
 }
 
 void    print_arp(unsigned char *buf)

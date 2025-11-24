@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_malcolm.h                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nicolas <nicolas@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:11:35 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/20 16:52:16 by nicolas          ###   ########.fr       */
+/*   Updated: 2025/11/24 10:57:49 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,9 @@ typedef struct s_malcolm
     char    *target_ip;
     char    *target_mac;
 
-    int	socket;
+    int		socket;
+
+	char	verbose;
 
 }   t_malcolm;
 

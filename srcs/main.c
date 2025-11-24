@@ -6,7 +6,7 @@
 /*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:13:50 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/14 14:35:42 by nponchon         ###   ########.fr       */
+/*   Updated: 2025/11/24 10:59:14 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,9 @@ int	main(int ac, char **av)
         fprintf(stderr, "Error: This program must be run as root.\n");
         return (1);
     }
-    if (ac != 5)
+    if (ac < 5 && ac > 6)
     {
-        fprintf(stderr, "Usage: sudo  %s <source_ip> <source_mac> <target_ip> <target_mac>\n", av[0]);
+        fprintf(stderr, "Usage: sudo  %s <source_ip> <source_mac> <target_ip> <target_mac> [-v]\n", av[0]);
         return (1);
     }
 

