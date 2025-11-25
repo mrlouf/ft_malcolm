@@ -29,7 +29,7 @@
 # include <netinet/if_ether.h>  // ARP packet structure
 # include <net/if.h>			// if_nametoindex
 # include <time.h>              // sleep
-
+# include <signal.h>			// signal()
 # include "../libft/libft.h"
 
 /* ************************************************************************** */
@@ -78,7 +78,9 @@ int     parse_mac(char *mac);
 int	    listen_arp(t_malcolm *m);
 void    print_arp(unsigned char *buf);
 
-void	send_arp(t_malcolm *m, unsigned char *buf);
+int		set_socket(t_malcolm *m);
+void	set_sourcemac(t_malcolm *m, unsigned char *ptr);
+void	send_arp(t_malcolm *m);
 
 void    free_malcolm(t_malcolm *m);
 

@@ -14,10 +14,65 @@
 
 void    free_malcolm(t_malcolm *m)
 {
-    if (m->socket != -1)
+    if (m->socket != -1) {
         close(m->socket);
-    if (m)
+		m->socket = -1;
+	}
+    if (m) {
         free(m);
+		m = NULL;
+	}
+}
+
+static int		hexvalue(const char c)
+{
+	if (c >= '0' && c <= '9') return (c - '0');
+	if (c >= 'a' && c <= 'f') return (c - 'a' + 10);
+	if (c >= 'A' && c <= 'F') return (c - 'A' + 10);
+	return -1;
+}
+
+void	set_sourcemac(t_malcolm *m, unsigned char *ptr)
+{
+	char *str = m->source_mac;
+	int hi, lo;
+	int count = 0;
+
+	while (*str)
+	{
+		if (*str == ':') {
+			str++; 
+		} else {
+			hi = hexvalue(*str++);
+			lo = hexvalue(*str++);
+			ptr[count++] = (hi << 4) | lo;
+		}
+	}
+}
+
+int		set_socket(t_malcolm *m)
+{
+    int sock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));	// ETH_P_ARP to capture ARP packets only
+    if (sock < 0) {
+	    fprintf(stderr, "Error: unable to create raw socket\n");
+	    return (free_malcolm(m), 1);
+    }
+
+	if (setsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, "eth0", strlen("eth0")) < 0) {
+        fprintf(stderr, "Error: setsockopt SO_BINDTODEVICE failed\n");
+        return (free_malcolm(m), 1);
+    }
+
+	struct timeval	timeout;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 100;
+	if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof timeout)) {
+		fprintf(stderr, "Error: setsockopt SO_BINDTODEVICE failed\n");
+        return (free_malcolm(m), 1);
+    }
+	
+	m->socket = sock;
+	return (0);
 }
 
 void	init_malcolm(char **av, t_malcolm *m)

@@ -44,21 +44,16 @@ void	forge_arp(struct ether_arp *original_arp, t_malcolm *m)
 
 }
 
-void	send_arp(t_malcolm *m, unsigned char *buf)
+void	send_arp(t_malcolm *m)
 {
-	(void)buf; // Unused parameter for now
-
 	int ifindex = if_nametoindex("eth0");
 	if (ifindex == 0) {
 		fprintf(stderr, "if_nametoindex failed");
 		return;
 	}
 
-	unsigned char src_mac[6];
-	sscanf(m->source_mac, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-		&src_mac[0], &src_mac[1], &src_mac[2], &src_mac[3], &src_mac[4], &src_mac[5]);
-	//for (size_t i = 0; i < ft_strlen(mac); i += 3)
-	//	dest[i / 3] = hex2int(&mac[i]);
+	unsigned char src_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+	set_sourcemac(m, src_mac);
 
 	// broadcast ARP to force a cache update on the target (unicast does not work well)
 	unsigned char broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
@@ -98,46 +93,31 @@ void	send_arp(t_malcolm *m, unsigned char *buf)
 
 int	listen_arp(t_malcolm *m)
 {
-    m->socket = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));	// ETH_P_ARP to capture ARP packets only
-    if (m->socket < 0) {
-	    fprintf(stderr, "Error: unable to create raw socket\n");
-	    return (free_malcolm(m), 1);
-    }
-
-	if (setsockopt(m->socket, SOL_SOCKET, SO_BINDTODEVICE, "eth0", strlen("eth0")) < 0) {
-        perror("setsockopt SO_BINDTODEVICE failed");
-        return (free_malcolm(m), 1);
-    }
-
-	// This might not be necessary since we need to send a reply at the first ARP request, ie. ignore container B's reply.
-    struct packet_mreq mreq = {0};
-    mreq.mr_ifindex = if_nametoindex("eth0");
-    mreq.mr_type = PACKET_MR_PROMISC;	// set promiscuous mode to capture also non-broadcast packets, eg. unicast ARP replies 
-    setsockopt(m->socket, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mreq, sizeof(mreq));
+	set_socket(m);
 
     unsigned char buf[65536];
     struct sockaddr_ll addr;
     socklen_t addrlen = sizeof(addr);
 
-    printf("Listening for packets between A and B...\n");
+    ft_printf("Listening for packets between A and B...\n");
 
     while (g_sigint == 0) {
         ssize_t len = recvfrom(m->socket, buf, sizeof(buf), 0,
                             (struct sockaddr*)&addr, &addrlen);
         if (len < 0)
 			continue;
-
         struct ether_header *eth = (struct ether_header*)buf;
         if (ntohs(eth->ether_type) == ETH_P_ARP) 
 			break;
     }
 
-	if (g_sigint) // exit gracefully on Ctrl+C
-		return (free_malcolm(m), 0);
+	if (g_sigint) // exit on Ctrl+C
+		return (0);
 
 	if (m->verbose)
 		print_arp(buf);
-	send_arp(m, buf);
+
+	send_arp(m);
 
     return (0);
 }

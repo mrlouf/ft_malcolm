@@ -14,6 +14,12 @@
 
 int g_sigint = 0;
 
+void	signal_handler(int sig)
+{
+	(void)sig;
+	g_sigint = 1;
+}
+
 int	main(int ac, char **av)
 {
     if (getuid() != 0)
@@ -27,6 +33,7 @@ int	main(int ac, char **av)
         return (1);
     }
 
+	signal(SIGINT, signal_handler);
     t_malcolm *m = malloc(sizeof(t_malcolm));
     if (!m)
     {
@@ -35,10 +42,12 @@ int	main(int ac, char **av)
     }
 
     init_malcolm(av, m);
+
     if (parse_malcolm(m))
         return (free_malcolm(m), 1);
-    listen_arp(m);
-    free_malcolm(m);
-
+    if (listen_arp(m))
+		return (free_malcolm(m), 1);
+ 
+ 	free_malcolm(m);
     return (0);
 }
