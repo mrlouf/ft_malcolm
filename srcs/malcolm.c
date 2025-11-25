@@ -29,7 +29,7 @@ void	set_replypacket(t_malcolm *m, unsigned char *packet, unsigned char *src, un
 	arp.ea_hdr.ar_op  = htons(ARPOP_REPLY);
 	ft_memcpy(arp.arp_sha, src, 6);
 	inet_pton(AF_INET, m->source_ip, arp.arp_spa);
-	ft_memcpy(arp.arp_tha, tgt, 6);
+	ft_memcpy(arp.arp_tha, src, 6);
 	inet_pton(AF_INET, m->source_ip, arp.arp_tpa);
 
 	ft_memcpy(packet, &eth, sizeof(eth));
