@@ -100,7 +100,9 @@ void    print_arp(unsigned char *buf)
     inet_ntop(AF_INET, arp->arp_spa, sender_ip, sizeof(sender_ip));
     inet_ntop(AF_INET, arp->arp_tpa, target_ip, sizeof(target_ip));
 
-    printf("ARP packet captured:\n");
+	ntohs(arp->ea_hdr.ar_op) == ARPOP_REQUEST ?
+								printf("ARP request captured:\n"):
+								printf("Fake ARP reply sent:\n");
     printf("  Sender MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         arp->arp_sha[0], arp->arp_sha[1], arp->arp_sha[2],
         arp->arp_sha[3], arp->arp_sha[4], arp->arp_sha[5]);
@@ -111,4 +113,5 @@ void    print_arp(unsigned char *buf)
     printf("  Target IP: %s\n", target_ip);
     printf("  Operation: %s\n",
         ntohs(arp->ea_hdr.ar_op) == ARPOP_REQUEST ? "ARP Request" : "ARP Reply");
+	printf("\n");
 }

@@ -27,7 +27,7 @@ int	main(int ac, char **av)
         fprintf(stderr, "Error: This program must be run as root.\n");
         return (1);
     }
-    if (ac < 5 && ac > 6)
+    if (ac < 5 || ac > 6)
     {
         fprintf(stderr, "Usage: sudo  %s <source_ip> <source_mac> <target_ip> <target_mac> [-v]\n", av[0]);
         return (1);

