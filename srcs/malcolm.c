@@ -6,7 +6,7 @@
 /*   By: nponchon <nponchon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 18:38:53 by nponchon          #+#    #+#             */
-/*   Updated: 2025/11/24 12:47:38 by nponchon         ###   ########.fr       */
+/*   Updated: 2025/11/26 10:31:05 by nponchon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,25 +46,8 @@ void	send_arp(t_malcolm *m)
 
 	unsigned char src_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 	set_sourcemac(m, src_mac);
-	// broadcast ARP to force a cache update on the target (unicast does not work well)
+	// broadcast ARP to force a cache update on the target (has more authority)
 	unsigned char broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-
-/* This worked before but not anymore...
-Listening for packets between A and B...
-ARP request captured:
-  Sender MAC: 3a:a6:35:0a:21:06
-  Sender IP: 172.18.0.2
-  Target MAC: 00:00:00:00:00:00
-  Target IP: 172.18.0.3
-  Operation: ARP Request
-Fake ARP reply sent:
-  Sender MAC: 52:19:94:0c:52:c5
-  Sender IP: 172.18.0.3
-  Target MAC: ff:ff:ff:ff:ff:ff
-  Target IP: 172.18.0.2
-  Operation: ARP Reply
-Successfully spoofed the target, exiting.
-*/
 
 	unsigned char packet[sizeof(struct ether_header) + sizeof(struct ether_arp)];
 	set_replypacket(m, packet, src_mac, broadcast_mac);
